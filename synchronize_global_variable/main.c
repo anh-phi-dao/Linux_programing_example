@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int glob = 0;
+static long int glob = 0;
 static void *threadFunc(void *arg)
 {
-    int loops = *((int *)arg);
-    int loc, j;
+    long int loops = *((int *)arg);
+    long int j;
     for (j = 0; j < loops; j++)
     {
         glob++;
@@ -18,8 +18,8 @@ static void *threadFunc(void *arg)
 int main(int argc, char *argv[])
 {
     pthread_t t1, t2;
-    int loops, s;
-    loops = 10000;
+    long int loops, s;
+    loops = 10000000;
     s = pthread_create(&t1, NULL, threadFunc, &loops);
     if (s != 0)
     {
@@ -44,6 +44,6 @@ int main(int argc, char *argv[])
         printf("Error on creating thread\n");
         return -1;
     }
-    printf("glob = %d\n", glob);
+    printf("glob = %ld\n", glob);
     return 0;
 }
