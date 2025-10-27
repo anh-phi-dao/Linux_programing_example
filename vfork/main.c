@@ -16,12 +16,13 @@ int main(int argc, char *argv[])
         break;
     case 0:
         sleep(3);
-        printf("Child executing\n");
+        printf("Child executing ");
         istack *= 3;
+        printf("istack=%d\n", istack);
         exit(EXIT_SUCCESS);
 
     default:
-        printf("Parent executing\n");
+        printf("Parent executing ");
         printf("istack=%d\n", istack);
         exit(EXIT_SUCCESS);
     }
