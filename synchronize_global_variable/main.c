@@ -35,13 +35,13 @@ int main(int argc, char *argv[])
     s = pthread_join(t1, NULL);
     if (s != 0)
     {
-        printf("Error on creating thread\n");
+        printf("Error on joining thread\n");
         return -1;
     }
     s = pthread_join(t2, NULL);
     if (s != 0)
     {
-        printf("Error on creating thread\n");
+        printf("Error on joining thread\n");
         return -1;
     }
     printf("glob = %ld\n", glob);
