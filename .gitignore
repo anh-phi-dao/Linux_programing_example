@@ -4,3 +4,5 @@ main
 queue/main_system_v
 process1
 process2
+client
+server
