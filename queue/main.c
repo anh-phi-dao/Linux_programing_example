@@ -1,90 +1,93 @@
 #include <mqueue.h>
-#include <unistd.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
-#define QUEUE_NAME "/myqueue"
+#define QUEUE_NAME "/my_posix_queue"
+#define MAX_MESSAGES 10
+#define MAX_MSG_SIZE 256
 
-mqd_t mdq1;
-struct mq_attr mdq1_atrb;
+mqd_t mq;
+struct mq_attr attr;
+char buffer[] = "Hello thread 2 from thread 1";
+unsigned int priority;
 
 void *Thread1(void *arg)
 {
-    char *s = (char *)arg;
-    int len = strlen(s);
-    for (int i = 0; i < len; i++)
+    char *string = (char *)arg;
+    pthread_t thisThread = pthread_self();
+    for (int i = 0; i < 3; i++)
     {
-        if (mq_send(mdq1, &s[i], 1, 0) == -1)
+        if (mq_send(mq, string, strlen(string) + 1, 10) == -1)
         {
             perror("mq_send");
             return NULL;
         }
+        else
+        {
+            printf("Thread 1 with id=%lu has sent message: %s\n", thisThread, buffer);
+        }
+        sleep(1);
     }
     return NULL;
 }
 
 void *Thread2(void *arg)
 {
-    struct mq_attr atrib;
-    mq_getattr(mdq1, &atrib);
-
-    char *buffer = (char *)malloc(atrib.mq_maxmsg + 1);
-    int pos = 0;
-
-    while (1)
+    char *string = malloc(sizeof(char) * 256);
+    pthread_t thisThread = pthread_self();
+    for (int i = 0; i < 3; i++)
     {
-        char c;
-        ssize_t bytes = mq_receive(mdq1, &c, atrib.mq_msgsize, NULL);
-        if (bytes >= 0)
+        if (mq_receive(mq, buffer, MAX_MSG_SIZE, &priority) == -1)
         {
-            buffer[pos++] = c;
+            perror("mq_receive");
+            return NULL;
         }
         else
         {
-            break;
+            printf("Thread 2 with id=%lu  Received message: %s with priority %u\n", thisThread, buffer, priority);
         }
-        if (pos >= atrib.mq_maxmsg)
-            break;
+        sleep(1);
     }
-
-    buffer[pos] = '\0';
-    printf("Receive message: %s\n", buffer);
-    free(buffer);
     return NULL;
 }
 
-char string[] = "Hello world";
-
 int main()
 {
-    mdq1_atrb.mq_flags = 0;
-    mdq1_atrb.mq_maxmsg = 16;
-    mdq1_atrb.mq_msgsize = 32;
-    mdq1_atrb.mq_curmsgs = 0;
 
-    mdq1 = mq_open("/mdq1", O_CREAT | O_RDWR, 0666, &mdq1_atrb);
-    if (mdq1 == (mqd_t)-1)
+    // Set message queue attributes
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = MAX_MESSAGES;
+    attr.mq_msgsize = MAX_MSG_SIZE;
+    attr.mq_curmsgs = 0;
+
+    // Create/open the message queue
+    mq = mq_open(QUEUE_NAME, O_CREAT | O_RDWR, 0644, &attr);
+    if (mq == (mqd_t)-1)
     {
         perror("mq_open");
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
     pthread_t t1, t2;
 
-    pthread_create(&t1, NULL, Thread1, string);
-    pthread_join(t1, NULL);
-
-    printf("Done thread 1\n");
+    pthread_create(&t1, NULL, Thread1, buffer);
 
     pthread_create(&t2, NULL, Thread2, NULL);
+
+    pthread_join(t1, NULL);
     pthread_join(t2, NULL);
 
-    printf("Done thread 2\n");
-
-    mq_close(mdq1);
-    mq_unlink("/mdq1");
+    if (mq_close(mq) == -1)
+    {
+        perror("mq_close");
+    }
+    if (mq_unlink(QUEUE_NAME) == -1)
+    {
+        perror("mq_unlink");
+    }
 
     return 0;
 }
