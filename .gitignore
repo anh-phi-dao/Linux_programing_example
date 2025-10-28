@@ -2,3 +2,5 @@ main
 *.txt
 .vscode/
 queue/main_system_v
+process1
+process2
