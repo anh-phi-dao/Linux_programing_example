@@ -7,7 +7,7 @@
 
 #define QUEUE_NAME "/my_posix_queue"
 #define MAX_MESSAGES 10
-#define MAX_MSG_SIZE 256
+#define MAX_MSG_SIZE 1024
 
 mqd_t mq;
 struct mq_attr attr;
@@ -63,8 +63,10 @@ int main()
     attr.mq_msgsize = MAX_MSG_SIZE;
     attr.mq_curmsgs = 0;
 
+    mq_unlink(QUEUE_NAME);
+
     // Create/open the message queue
-    mq = mq_open(QUEUE_NAME, O_CREAT | O_RDWR, 0644, &attr);
+    mq = mq_open(QUEUE_NAME, O_CREAT | O_RDWR, 0666, &attr);
     if (mq == (mqd_t)-1)
     {
         perror("mq_open");
