@@ -27,7 +27,9 @@ int main(int arg, char *argv[])
     /*parent process*/
     default:
         sleep(3);
+        /*this command will show out running processes*/
         sprintf(cmd, "ps | grep %s", basename(argv[0]));
+        printf("performing %s command \n", cmd);
         /*Execute command ps | grep main*/
         system(cmd);
 
