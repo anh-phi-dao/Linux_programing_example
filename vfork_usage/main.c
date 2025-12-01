@@ -22,13 +22,14 @@ int main(int argc, char *argv[])
             perror("execv");
             exit(EXIT_FAILURE);
         }
+        printf("Escaping from %d process\n", getpid());
         exit(EXIT_SUCCESS);
 
     default:
         printf("Parent executing ");
         printf("istack=%d\n", istack);
         a = wait(NULL);
-        printf("Escaping from %d process\n", a);
+        printf("Escaping from %d process\n", getpid());
         exit(EXIT_SUCCESS);
     }
 }

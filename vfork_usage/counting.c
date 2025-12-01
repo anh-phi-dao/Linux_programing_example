@@ -10,5 +10,6 @@ int main()
         sleep(1);
         printf("Value i=%d\n", i);
     }
+    printf("Escaping from %d process\n", getpid());
     return 0;
 }
