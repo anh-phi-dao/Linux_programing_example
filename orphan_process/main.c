@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
 
     pid_t childPid;
     pid_t temp;
+    printf("Current parent pid: %d \n", getpid());
+
     childPid = fork();
 
     switch (childPid)
@@ -21,15 +23,13 @@ int main(int argc, char *argv[])
 
     case 0:
 
-        sleep(10);
-        printf("\n");
-        system("ps -f");
+        sleep(2);
+        printf("Parent of this pid :%d\n", getppid());
         sleep(1);
         printf("Child with PID:%d escaping\n", getpid());
         exit(EXIT_SUCCESS);
 
     default:
-        system("ps -f");
         printf("Parent escaping\n");
         break;
     }
